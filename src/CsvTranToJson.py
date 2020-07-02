@@ -22,9 +22,10 @@ class Tran:
 
     # 这里的path是绝对路径----比如'C:/Users/Air/Downloads/2199398.csv'
 
-    def __init__(self, path_csv, path_json):
+    def __init__(self, path_csv, path_json, col_num):
         self.path_csv = path_csv
         self.path_json = path_json
+        self.col_num = col_num
 
     def tran(self):
 
@@ -37,7 +38,7 @@ class Tran:
         fw = open(self.path_json, "w", encoding='utf-8')
         for i in range(1, len(ls)):
             ls[i] = dict(zip(ls[0], ls[i]))
-        b = json.dumps(ls[1:], sort_keys=True, indent=9, ensure_ascii=False)
+        b = json.dumps(ls[1:], sort_keys=True, indent=self.col_num, ensure_ascii=False)
         print(b)
         fw.write(b)
         fw.close()
