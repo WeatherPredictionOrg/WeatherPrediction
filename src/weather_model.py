@@ -63,7 +63,7 @@ class NormalARIMA:
         'tmax': [5, 2]   # mse=52.6
     }
 
-    model_path = 'models/normal_{}_model.pkl'
+    model_path = 'models/normal_{}_model.pkl' # 绝对路径
 
     def __init__(self):
         logging.debug('normal ARIMA')
