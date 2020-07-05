@@ -10,6 +10,7 @@ import pandas as pd
 import pickle
 from sklearn import metrics
 import logging
+# coding=utf-8
 logging.basicConfig(level=logging.DEBUG)
 
 ord_version = True  # 是否使用statsmodels的旧ARIMA类
@@ -45,6 +46,7 @@ class Predictor:
             print(frame)
             if file_name:
                 frame.to_csv(file_name, index=None)
+            frame.to_json(force_ascii=False)    
             return frame
 
     def validate(self):
@@ -61,7 +63,7 @@ class NormalARIMA:
         'tmax': [5, 2]   # mse=52.6
     }
 
-    model_path = 'models/normal_{}_model.pkl'
+    model_path = 'models/normal_{}_model.pkl' # 绝对路径
 
     def __init__(self):
         logging.debug('normal ARIMA')
