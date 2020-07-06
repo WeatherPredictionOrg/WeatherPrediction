@@ -1,5 +1,9 @@
-//java调用python里的预测函数获取预测后数据
-//作者：黎佩瑜，王迪
+/**
+ * @author 黎佩瑜 王迪
+ * @version Function.java
+ *     该类调用python文件获取指定日期的预测数据
+ */
+
 
 package com.example.demo.controller;
 
@@ -18,11 +22,11 @@ import org.springframework.boot.SpringApplication;
 import com.example.demo.WeatherServerApplication;
 
 public class Function {
-	public static void main(String[] args) {
-		getJsonRun("2011-01-01","2011-01-03");
-	}
+	/*public static void main(String[] args) {
+		System.out.println(getJsonRun("2011-01-01","2011-01-03"));
+	}*/
     public static String getJsonRun(String date1,String date2) {
-    	ArrayList<PredictedData> preDataJsonList = null;
+    	ArrayList<PredictedData> preDataJsonList = new ArrayList<PredictedData>();
     	JSONObject jsonObject=new JSONObject();
     	PredictedData preData=new PredictedData();
     	String str="python E:\\\\Lib\\\\site-packages\\\\weather_model.py "+date1+" "+date2;
@@ -35,7 +39,7 @@ public class Function {
             line=in.readLine();
             String[] temp;
             while ((line = in.readLine()) != null) {
-            	//System.out.println("line"+line);
+            	System.out.println(line);
             	temp=line.split(" ");
             	preData.setDate(temp[1]);
             	preData.setMin(Double.parseDouble(temp[3]));
@@ -50,6 +54,7 @@ public class Function {
             e.printStackTrace();
         }
         return getEvaluatedOptionsJson(preDataJsonList);
+        //return "trying";
 	}
     public static String getEvaluatedOptionsJson(ArrayList<PredictedData> checkItemIds) {
         if (checkItemIds.isEmpty()) {

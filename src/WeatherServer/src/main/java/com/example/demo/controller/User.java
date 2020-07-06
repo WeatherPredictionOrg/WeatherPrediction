@@ -1,5 +1,8 @@
 package com.example.demo.controller;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class User implements java.io.Serializable{
 	String username;
 	String password;
