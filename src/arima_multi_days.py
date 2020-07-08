@@ -19,6 +19,7 @@ from dataGenerator import DataGenerator
 import warnings
 warnings.filterwarnings("ignore")
 
+# java运行时相对路径失效，因此使用绝对路径，以/结尾，如 E:/folder/
 root_path = ''
 
 
@@ -84,7 +85,7 @@ class Predictor2:
         res = []
         date_list = pd.date_range(date, periods=7)
         res.append(predictor.predict(date_list[0], date_list[-1], auto_model=auto_model))
-        return res
+        return res, date_list
 
     def predict(self, start, end, auto_model=False):
         # print('start={}, end={}'.format(start, end))
@@ -167,12 +168,16 @@ if __name__ == '__main__':
         predictor.train(date_list[0], date_list[-1], False, model_saved=False)
     else:
         # 暂时不要开auto，模型文件有点大没往上放
-        res = predictor.predict_by_date(args.start, args.auto)
-        # res = predictor.predict_by_date(args.start, args.auto)
+        res, date_list = predictor.predict_by_date(args.start, args.auto)
+        # 以下为格式化输出
         np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
-        # print(res)
-        res0 = np.array(res).swapaxes(0, 1)
+        res0 = np.array(res).swapaxes(1, 2)[0]
+        res0 = np.round(res0, 2)
+        res0 = res0.astype(str)
+        date_list = np.array(date_list.strftime("%Y-%m-%d"))
+        res0 = np.insert(res0, 0, date_list, axis=1)
         for aaa in res0:
-            print(aaa[0])
+            li = aaa.tolist()
+            print(' '.join(li))
         #     plt.plot(aaa[0])
         # plt.show()

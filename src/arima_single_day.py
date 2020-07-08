@@ -18,8 +18,9 @@ from dataGenerator import DataGenerator
 import warnings
 warnings.filterwarnings("ignore")
 
-
+# java运行时相对路径失效，因此使用绝对路径，以/结尾，如 E:/folder/
 root_path = ''
+
 
 # 评估函数
 def eval_metrics(y_true, y_pred):
@@ -73,7 +74,7 @@ class Predictor1:
         for d in date_list:
             date_s = pd.to_datetime(d)
             res.append(predictor.predict(date_s, auto_model=auto_model, fixed_param=fixed_param))
-        return res
+        return res, date_list
 
     def predict(self, date, auto_model=False, fixed_param=True):
         self.data_raw = self.generator.generate(start_all, end_all, labels, [date.month, date.day])  # 生成需要的数据
@@ -168,13 +169,18 @@ if __name__ == '__main__':
     if train:
         predictor.train(pd.to_datetime('2020-06-25'), False)
     else:
-        res = predictor.predict_by_date(args.start, args.auto, not args.nofixed)
+        res, date_list = predictor.predict_by_date(args.start, args.auto, not args.nofixed)
+        # 以下为格式化输出
+        res = np.array(res)
         np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
-        # print(res)
-        res0 = np.array(res).swapaxes(0, 1)
+        res0 = np.round(res, 2)
+        res0 = res0.astype(str)
+        date_list = np.array(date_list.strftime("%Y-%m-%d"))
+        res0 = np.insert(res0, 0, date_list, axis=1)
         for aaa in res0:
-            print(aaa)
-        #     plt.plot(aaa)
+            li = aaa.tolist()
+            print(' '.join(li))
+        #     plt.plot(aaa[0])
         # plt.show()
 
 
