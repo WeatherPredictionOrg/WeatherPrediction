@@ -1,3 +1,4 @@
+<<<<<<< HEAD:src/WeatherServer/src/main/java/com/example/demo/enity/Data.java
 package com.example.demo.enity;
 
 public class Data implements java.io.Serializable{
@@ -19,3 +20,26 @@ public class Data implements java.io.Serializable{
 		super();
 	}
 }
+=======
+package com.example.demo.enity;
+
+public class Data implements java.io.Serializable{
+	String date1;
+	String date2;
+	public String getDate1() {
+		return date1;
+	}
+	public String getDate2() {
+		return date2;
+	}
+	public void setDate1(String date1) {
+		this.date1=date1;
+	}
+	public void setDate2(String date2) {
+		this.date2=date2;
+	}
+	public Data() {
+		super();
+	}
+}
+>>>>>>> cc07d83a60cc6fb9e367e0a4e4043817d162b39c:src/WeatherServer/src/main/java/com/example/demo/enity/Data.java
