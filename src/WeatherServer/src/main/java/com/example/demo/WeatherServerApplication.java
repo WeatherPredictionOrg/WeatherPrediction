@@ -1,8 +1,3 @@
-/**
- * @author 黎佩瑜 王迪
- * @version WeatherServerApplication.java
- */
-
 package com.example.demo;
 
 import java.util.List;
