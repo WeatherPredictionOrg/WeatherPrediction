@@ -19,6 +19,8 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
+root_path = ''
+
 # 评估函数
 def eval_metrics(y_true, y_pred):
     # 计算MAE, MSE, MAPE值
@@ -60,7 +62,7 @@ def find_best_order(data, is_train):
 
 class Predictor1:
     def __init__(self):
-        self.generator = DataGenerator()
+        self.generator = DataGenerator(root_path+'full_data.csv')
         self.data_raw = self.generator.generate(start_all, end_all, labels)
 
     # 外部调用接口，起始时间，是否使用auto_arima，是否在普通arima模式下使用固定的pq值

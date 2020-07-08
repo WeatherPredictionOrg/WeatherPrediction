@@ -19,6 +19,8 @@ from dataGenerator import DataGenerator
 import warnings
 warnings.filterwarnings("ignore")
 
+root_path = ''
+
 
 # 保存模型
 def save_model(file_path, model):
@@ -73,12 +75,8 @@ def find_best_order(data, is_train):
 
 
 class Predictor2:
-    normal_model_path = 'models/normal_{}_model.pkl'
-    auto_model_path = 'models/auto_{}_model.pkl'
-
-    def __init__(self):
-        self.generator = DataGenerator()
-        self.data_raw = self.generator.generate(start_all, end_all, labels)
+    normal_model_path = root_path+'models/normal_{}_model.pkl'
+    auto_model_path = root_path+'models/auto_{}_model.pkl'
 
     # 外部调用接口，起始时间，是否使用auto_arima
     # 返回从起始时间开始7天的tavg，tmax，tmin

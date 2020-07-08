@@ -6,8 +6,8 @@ from dateutil import parser
 # 生成数据类
 class DataGenerator:
 
-    def __init__(self):
-        self.data_raw = pd.read_csv('full_data.csv', encoding='utf-8')
+    def __init__(self, file_path):
+        self.data_raw = pd.read_csv(file_path, encoding='utf-8')
         self.data_raw['date'] = self.data_raw['DATE'].apply(parser.parse)
         self.data_raw['tmax'] = self.data_raw['TMAX'].astype(float)
         self.data_raw['tmin'] = self.data_raw['TMIN'].astype(float)
@@ -32,6 +32,6 @@ class DataGenerator:
 
 
 if __name__ == '__main__':
-    generator = DataGenerator()
+    generator = DataGenerator('full_data.csv')
     lens = generator.generate('1980-01-01', '2000-01-01', ['date', 'tmin', 'tmax', 'tavg'])
     print(lens)
