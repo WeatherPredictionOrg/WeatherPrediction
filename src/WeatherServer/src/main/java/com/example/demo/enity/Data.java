@@ -1,6 +1,11 @@
-
 package com.example.demo.enity;
 
+import lombok.*;
+
+
+//@Data
+//@AllArgsConstructor
+//@NoArgsConstructor
 public class Data implements java.io.Serializable{
 	String date1;
 	String date2;
@@ -20,4 +25,3 @@ public class Data implements java.io.Serializable{
 		super();
 	}
 }
-
