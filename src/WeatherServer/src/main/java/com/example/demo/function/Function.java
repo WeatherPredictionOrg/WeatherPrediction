@@ -1,4 +1,5 @@
-
+//java调用python里的预测函数获取预测后数据
+//作者：黎佩瑜，王迪
 
 package com.example.demo.function;
 
@@ -19,28 +20,28 @@ import com.example.demo.enity.PredictedData;
 
 public class Function {
 	public static void main(String[] args) {
-		getJsonRun("2011-01-01","2011-01-03");
+		//System.out.println(getJsonRun("2009-01-01","2009-01-03"));
 	}
     public static String getJsonRun(String date1,String date2) {
-    	ArrayList<PredictedData> preDataJsonList = null;
+    	ArrayList<PredictedData> preDataJsonList =new ArrayList<PredictedData>();
     	JSONObject jsonObject=new JSONObject();
-    	PredictedData preData=new PredictedData();
-    	String str="python E:\\\\Lib\\\\site-packages\\\\weather_model.py "+date1+" "+date2;
+    	
+    	String str="python E:\\\\Lib\\\\site-packages\\\\arima_multi_days.py -start "+date1;
 		Process proc;
         try {
-        	//"python E:\\Lib\\site-packages\\weather_model.py 2011-01-01 2011-01-03"
             proc = Runtime.getRuntime().exec(str);
             BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
             String line = null;
-            line=in.readLine();
             String[] temp;
             while ((line = in.readLine()) != null) {
-            	System.out.println(line);
+            	PredictedData preData=new PredictedData();
+            	//System.out.println(line);
             	temp=line.split(" ");
-            	preData.setDate(temp[1]);
+            	preData.setDate(temp[0]);
+            	preData.setAverage(Double.parseDouble(temp[1]));
+            	preData.setMax(Double.parseDouble(temp[2]));
             	preData.setMin(Double.parseDouble(temp[3]));
-            	preData.setMax(Double.parseDouble(temp[5]));
-            	//preDataJsonList.add(preData);
+            	preDataJsonList.add(preData);
             }
             in.close();
             proc.waitFor();
@@ -49,8 +50,8 @@ public class Function {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        //return getEvaluatedOptionsJson(preDataJsonList);
-        return "trying";
+        return getEvaluatedOptionsJson(preDataJsonList);
+        
 	}
     public static String getEvaluatedOptionsJson(ArrayList<PredictedData> checkItemIds) {
         if (checkItemIds.isEmpty()) {
@@ -60,7 +61,7 @@ public class Function {
         for (PredictedData item : checkItemIds) {
             jsonArray.put(item.getJSONObject());
         }
+        //System.out.println(jasonArray);
         return jsonArray.toString();
     }
 }
-

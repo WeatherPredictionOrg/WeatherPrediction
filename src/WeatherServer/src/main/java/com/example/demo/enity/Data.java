@@ -1,6 +1,16 @@
-
 package com.example.demo.enity;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.json.JSONObject;
+
+import lombok.*;
+
+
+//@Data
+//@AllArgsConstructor
+//@NoArgsConstructor
 public class Data implements java.io.Serializable{
 	String date1;
 	String date2;
@@ -16,8 +26,8 @@ public class Data implements java.io.Serializable{
 	public void setDate2(String date2) {
 		this.date2=date2;
 	}
+	
 	public Data() {
 		super();
 	}
 }
-
