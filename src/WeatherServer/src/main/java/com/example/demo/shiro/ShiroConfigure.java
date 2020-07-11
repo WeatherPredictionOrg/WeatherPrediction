@@ -46,15 +46,17 @@ public class ShiroConfigure {
 		//设置安全管理器
 		bean.setSecurityManager(defaultWebSecurityManager);
 		//bean.setSuccessUrl("/manage");
-		//bean.setUnauthorizedUrl("/pickdates");
+		//bean.setLoginUrl("/admin");
+		//bean.setUnauthorizedUrl("/pickdate");
 		//添加Shiro的内置过滤器
 		Map<String,String>filterMap=new LinkedHashMap<>();
+		System.out.println("拦截了吗？");
 		filterMap.put("/login", "anon");
 		filterMap.put("/register", "anon");
 		filterMap.put("/pickdate", "roles[user]");
-		//filterMap.put("/manage", "roles[admin]");
-		
-		//bean.setFilterChainDefinitionMap(filterMap);
+		filterMap.put("/admin", "roles[admin]");
+		bean.setLoginUrl("/");
+		bean.setFilterChainDefinitionMap(filterMap);
 		return bean;
 	}
 	

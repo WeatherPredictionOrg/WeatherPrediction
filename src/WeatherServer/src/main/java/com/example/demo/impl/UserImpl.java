@@ -48,4 +48,9 @@ public class UserImpl implements UserService {
     public void deleteUser(String user_name) {
         //usm.deleteUser(user_name);
     }
+
+	@Override
+	public User getUser(String username) {
+		return logMapper.getUser(username);
+	}
 }
