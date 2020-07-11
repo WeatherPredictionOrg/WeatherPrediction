@@ -1,9 +1,11 @@
-
 package com.example.demo.shiro;
 
-import com.example.demo.enity.User;
-
+import com.mysql.*;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.*;
+import com.example.demo.enity.*;
 
 public class Sql {
 	private static Connection getConn() {
@@ -11,7 +13,7 @@ public class Sql {
 		String driver = "com.mysql.jdbc.Driver";
 		String url = "jdbc:mysql://localhost:3306/RUNOOB?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
 		String username = "root";
-		String password = "123456";
+		String password = "Mysql78089091";
 		Connection conn = null;
 		try {
 			Class.forName(driver); // classLoader,加载对应驱动
@@ -151,5 +153,4 @@ public class Sql {
 		user.setPassword("1234");
 		System.out.println(Sql.insert(user));;
 	}
-
 }

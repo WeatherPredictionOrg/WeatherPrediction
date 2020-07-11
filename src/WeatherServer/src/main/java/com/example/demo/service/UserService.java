@@ -1,10 +1,18 @@
 package com.example.demo.service;
 
-import com.example.demo.enity.User;
+import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONArray;
+
+@Service
 public interface UserService {
+    JSONArray getList();
 
-    public User findByName(String name);
+    String getUserRoleByName(String name);
+    
+    String getUserPasswordByName(String name);
+    
+    void addUser(String user_name, String password);
 
-
+    void deleteUser(String user_name);
 }
