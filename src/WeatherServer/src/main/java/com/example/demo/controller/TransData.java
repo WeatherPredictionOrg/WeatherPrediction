@@ -72,16 +72,11 @@ public class TransData {
 	        }catch(IncorrectCredentialsException  e) {//密码错误
 	        	return 2;
 	        }
-	        if(role.equals("user")) {
- 	        	return 1;
- 	        }else if(role.equals("admin")){
+	        if(role.equals("admin")) {
  	        	return 3;
- 	        }
- 	        else {
- 	        	return 4;
- 	        }
- 	        
-			
+ 	        }else{
+ 	        	return 1;
+ 	        }       
 	    }
 	    
 	    @RequestMapping(value = "/register", method = RequestMethod.POST)
@@ -127,16 +122,35 @@ public class TransData {
 							preData.setMax(Double.parseDouble(temp[1]));
 							preData.setMin(Double.parseDouble(temp[2]));
 							preDataJsonList.add(preData);
-							while(rs.next()&&k<6) {
-								r=rs.getString("value");
-								temp=r.split("#");
-								PredictedData preData1=new PredictedData();
-								preData1.setDate(rs.getString("date"));
-								preData1.setAverage(Double.parseDouble(temp[0]));
-								preData1.setMax(Double.parseDouble(temp[1]));
-								preData1.setMin(Double.parseDouble(temp[2]));
-								preDataJsonList.add(preData1);
-								k++;
+							if(s1.equals(s2)) {
+								while(rs.next()&&k<6) {
+									r=rs.getString("value");
+									temp=r.split("#");
+									PredictedData preData1=new PredictedData();
+									preData1.setDate(rs.getString("date"));
+									preData1.setAverage(Double.parseDouble(temp[0]));
+									preData1.setMax(Double.parseDouble(temp[1]));
+									preData1.setMin(Double.parseDouble(temp[2]));
+									preDataJsonList.add(preData1);
+									k++;
+								}
+							}
+							else {
+								boolean flag=true;
+								while(rs.next()&&flag) {
+									if(rs.getString("date").equals(s2)) {
+										flag=false;
+									}
+									r=rs.getString("value");
+									temp=r.split("#");
+									PredictedData preData1=new PredictedData();
+									preData1.setDate(rs.getString("date"));
+									preData1.setAverage(Double.parseDouble(temp[0]));
+									preData1.setMax(Double.parseDouble(temp[1]));
+									preData1.setMin(Double.parseDouble(temp[2]));
+									preDataJsonList.add(preData1);
+									k++;
+								}
 							}
 							
 						}
