@@ -1,5 +1,4 @@
 # LSTM预测类，模型的预测接口，需要补全预测日期前 time_step 天的数据才可正常预测
-# 现在 2013 年之前均可
 # Author：童路勤
 import os
 
@@ -23,18 +22,19 @@ import argparse
 from dateutil import parser
 
 # .py 文件所在路径，为解决 java 调用时使用相对路径无法找到文件的问题
-root_path = ''
+# 路径以/结尾，如 E:/abc/
+root_path = 'E:/testpy/'
 
 
 class LSTMPredictor:
     model_path = root_path + 'models/model_{}_{}.h5'  # 模型文件
     data_file = root_path + 'data/{}.csv'  # 训练数据
     predict_file = root_path + 'data/{}.csv'  # 预测数据
-    time_step = 14  # 基于之前 time_step 个数据进行预测
+    time_step = 56  # 基于之前 time_step 个数据进行预测
     predict_num = 7  # 预测之后的 predict_num 个数据
     feature_num = 1  # 数据维度
     scaler = (0, 1)  # 归一化参数
-    layers = [64, 64]  # LSTM单元数
+    layers = [128, 128]  # LSTM单元数
 
     def __init__(self, city_name, label):
         self.city_name = city_name
@@ -70,12 +70,14 @@ class LSTMPredictor:
     # 输出以指定日期为日期起点的7天的数据
     def predict_by_date(self, date):
         # 得到指定日期前长度为 self.time_step 的序列
-        data_file = predictor.predict_file.format(self.city_name)
-        datas = predictor.load_data(data_file, [self.label], remove_date=False)
+        data_file = self.predict_file.format(self.city_name)
+        datas = self.load_data(data_file, [self.label], remove_date=False)
         datas['date'] = datas['date'].apply(parser.parse)
         end_row = datas[datas['date'] == date].index[0] - 1
         start_row = end_row - self.time_step + 1
         x_pred = datas.loc[start_row:end_row, self.label]
+        x_pred.fillna(x_pred.mean(), inplace=True)
+        # print(x_pred)
         # 输入网络进行预测
         y_pred = self.predict(x_pred)[0]
         return y_pred
@@ -94,7 +96,8 @@ class LSTMPredictor:
 
 arg_parser = argparse.ArgumentParser(description='Set a specific city and start date')
 arg_parser.add_argument('-city', type=str, required=True, help='the city')
-arg_parser.add_argument('-start', type=str, default='2005-06-20', help='the start date')
+arg_parser.add_argument('-start', type=str, default='2020-06-20', help='the start date')
+
 
 if __name__ == '__main__':
     labels = ['tavg', 'tmax', 'tmin']
@@ -102,7 +105,7 @@ if __name__ == '__main__':
     predictor = LSTMPredictor(args.city, 'tavg')
     date = args.start
     result = []
-    for label in labels:
+    for label in labels[:]:
         predictor.label = label
         result.append(predictor.predict_by_date(date))
     # 以下为规范化输出，预测 n 天，每天3个数据，则格式为：

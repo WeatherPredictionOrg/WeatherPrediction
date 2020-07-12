@@ -34,7 +34,7 @@ def reprocess_data(scaler, data):
 
 
 # 计算 MSE 等
-def evaluate(label, y_true, y_pre):
+def evaluate(label, y_true, y_pre, log_file=None):
     mse = mean_squared_error(y_true, y_pre)
     rmse = math.sqrt(mse)
     mae = mean_absolute_error(y_true, y_pre)
@@ -43,17 +43,22 @@ def evaluate(label, y_true, y_pre):
     print('{} RMSE={}'.format(label, rmse))
     print('{} MAE={}'.format(label, mae))
     print('{} R2={}'.format(label, r2))
+    if log_file is not None:
+        log_file.write('{} MSE={}\n'.format(label, mse))
+        log_file.write('{} RMSE={}\n'.format(label, rmse))
+        log_file.write('{} MAE={}\n'.format(label, mae))
+        log_file.write('{} R2={}\n'.format(label, r2))
 
 
 class LSTMPredictor:
     model_path = root_path + 'models/model_{}_{}.h5'  # 模型文件
     data_file = root_path + 'data/{}.csv'  # 训练数据
     predict_file = root_path + 'data/{}.csv'  # 预测数据
-    time_step = 14  # 基于之前 time_step 个数据进行预测
+    time_step = 56  # 基于之前 time_step 个数据进行预测
     predict_num = 7  # 预测之后的 predict_num 个数据
     feature_num = 1  # 数据维度
-    scaler = (0, 1)  # 归一化参数
-    layers = [64, 64]  # LSTM单元数
+    scaler = (-1, 1)  # 归一化参数
+    layers = [128, 128]  # LSTM单元数
 
     def __init__(self, city_name, label):
         self.city_name = city_name
@@ -66,7 +71,7 @@ class LSTMPredictor:
         model.add(LSTM(layers[1]))
         model.add(Dense(self.predict_num))
         if compile:
-            model.compile(loss='mse', optimizer=Adam())
+            model.compile(loss='mse', optimizer='adam')
         return model
 
     # 进行验证，在原数据集中分别取某些序列作为输入，得到预测序列，与原序列对比
@@ -117,13 +122,33 @@ class LSTMPredictor:
 
     # 加载 csv 数据，用于训练或预测
     def load_data(self, filename, labels, remove_date=True):
-        data_raw = read_csv(filename)
         if remove_date:
-            data = data_raw.loc[:, labels]
-            dataset = data.values
-            dataset = dataset.astype('float32')
-            return dataset
+            data_raw = read_csv(filename, index_col='date')
+            data_raw = data_raw.loc[:, labels]
+            start, end = 1980, 2000
+            # for i in range(1980, 2021):
+            #     f = data_raw['{}-01-01'.format(i):'{}-12-31'.format(i)]
+            #     # print(f)
+            #     print(i, f.isna().sum().sum())
+            #     if f.isna().sum().sum() < 180:
+            #         data_raw['{}-01-01'.format(i):'{}-12-31'.format(i)].fillna(method='ffill', inplace=True)
+            #         data_raw['{}-01-01'.format(i):'{}-12-31'.format(i)].fillna(method='bfill', inplace=True)
+            #         end = i
+            #     else:
+            #         end = i - 1
+            #         break
+            if end is not None:
+                print('from {} to {}'.format(start, end))
+                data_raw = data_raw['{}-01-01'.format(start):'{}-12-31'.format(end)]
+                # data = data_raw.loc[:, labels]
+                dataset = data_raw.values
+                dataset = dataset.astype('float32')
+                return dataset
+            else:
+                print('ERROR')
+                return None
         else:
+            data_raw = read_csv(filename)
             return data_raw
 
     # 将数据转换为时间序列格式
@@ -151,18 +176,20 @@ class LSTMPredictor:
         return trainX, trainY, testX, testY
 
     # 训练模型，训练结束后保存模型并输出在训练集和验证集上的预测效果
-    def train(self, epochs=40, batch_size=64):
+    def train(self, epochs=40, batch_size=64, log_file=None):
         dataset = self.load_data(self.data_file.format(self.city_name), [self.label])
         # 数据处理
         scaler = MinMaxScaler(feature_range=self.scaler)
         trainX, trainY, testX, testY = self.process_data(dataset, scaler)
+        print(trainX)
+        print(trainY)
 
         model = self.get_model(self.layers, compile=True)
         model.summary()
-        reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.8, patience=3, verbose=1)
+        reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.7, patience=3, verbose=1)
 
-        history = model.fit(trainX, trainY, epochs=epochs, batch_size=batch_size, verbose=2,
-                            validation_data=(testX, testY), callbacks=[reduce_lr])
+        history = model.fit(trainX, trainY, epochs=epochs, batch_size=batch_size, verbose=1,
+                            validation_data=(testX, testY))
         model.save_weights(self.model_path.format(self.city_name, self.label))
         # 预测
         train_predict = model.predict(trainX)
@@ -171,16 +198,21 @@ class LSTMPredictor:
         reprocessed = reprocess_data(scaler, [test_predict, testY, train_predict, trainY])
         repro_test_predict, repro_testY, repro_train_predict, repro_trainY = reprocessed
         # 计算 MSE 等
-        evaluate('test', repro_testY, repro_test_predict)
-        evaluate('train', repro_trainY, repro_train_predict)
+        evaluate('test', repro_testY, repro_test_predict, log_file=log_file)
+        evaluate('train', repro_trainY, repro_train_predict, log_file=log_file)
 
 
 if __name__ == '__main__':
     labels = ['tavg', 'tmax', 'tmin']
-    train = False
+    train = True
     if train:
-        predictor = LSTMPredictor('beijing', 'tavg')
-        predictor.train(epochs=40, batch_size=32)
+        city_name = 'wu lu mu qi_CHM00051463'
+        log_file = open('{}.log'.format(city_name), 'w')
+        for lab in labels[:1]:
+            predictor = LSTMPredictor(city_name, lab)
+            log_file.write(lab + '\n')
+            predictor.train(epochs=40, batch_size=64, log_file=log_file)
+        log_file.close()
     else:
-        predictor = LSTMPredictor('beijing', 'tavg')
+        predictor = LSTMPredictor('beijing_CHM00054511', 'tmax')
         predictor.validate()
