@@ -55,8 +55,7 @@ public class TransData {
 	    @ResponseBody
 	    public int login(@RequestBody User user) {
 	    	String s1=user.getUsername();
-	    	String s2=user.getPassword();
-	    	System.out.println(s1+s2);
+	    	String s2=user.getPassword();	    	
 	    	 // 从SecurityUtils里边创建一个 subject
 	        Subject subject = SecurityUtils.getSubject();
 	        // 在认证提交前准备 token（令牌）
@@ -75,9 +74,13 @@ public class TransData {
 	        }
 	        if(role.equals("user")) {
  	        	return 1;
- 	        }else {
+ 	        }else if(role.equals("admin")){
  	        	return 3;
  	        }
+ 	        else {
+ 	        	return 4;
+ 	        }
+ 	        
 			
 	    }
 	    
@@ -86,9 +89,6 @@ public class TransData {
 	    public int register(@RequestBody User user) {
 	    	String s1=user.getUsername();
 	    	String s2=user.getPassword();
-	    	System.out.println(s1+s2);
-	    	System.out.println(userMapper.existName(s1));
-	    	//System.out.println(userMapper);
 	    	if(userMapper.existName(s1)!=null) {
 	    		return 0;
 	    	}else {
@@ -103,50 +103,69 @@ public class TransData {
 	    	String[] pos= {"安徽","北京","福建","甘肃","广东","广西","贵州","黑龙江","海南","河北","河南",
 	    			"河北","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西",
 	    			"陕西","上海","四川","天津","西藏","新疆","云南","浙江","重庆"};
+	    	int k=0;
 	    	String sql,r,d;
-	    	ArrayList<MapData> list =new ArrayList<MapData>();
+	    	Connection conn = getConn();
+	    	ArrayList<PredictedData> preDataJsonList =new ArrayList<PredictedData>();
 	    	String[] temp;
 	    	String s1=data.getDate1();
 	    	String s2=data.getDate2();
 	    	String date=data.getDate();
 	    	String order=data.getOrder();
 	    	if(order.equals("chart")) {
-	    		Function function=new Function();
-		    	System.out.println(s1);
-		    	String re=function.getJsonRun(s1, s2);
+	    		sql = "select * from beijing2";
+	    		try {
+					ResultSet rs = ((PreparedStatement) conn.prepareStatement(sql)).executeQuery();
+					while(rs.next()) {
+						d=rs.getString("date");
+						if(d.equals(s1)) {
+							r=rs.getString("value");
+							temp=r.split("#");
+							PredictedData preData=new PredictedData();
+							preData.setDate(rs.getString("date"));
+							preData.setAverage(Double.parseDouble(temp[0]));
+							preData.setMax(Double.parseDouble(temp[1]));
+							preData.setMin(Double.parseDouble(temp[2]));
+							preDataJsonList.add(preData);
+							while(rs.next()&&k<6) {
+								r=rs.getString("value");
+								temp=r.split("#");
+								PredictedData preData1=new PredictedData();
+								preData1.setDate(rs.getString("date"));
+								preData1.setAverage(Double.parseDouble(temp[0]));
+								preData1.setMax(Double.parseDouble(temp[1]));
+								preData1.setMin(Double.parseDouble(temp[2]));
+								preDataJsonList.add(preData1);
+								k++;
+							}
+							
+						}
+					}
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}	    		
+		    	String re=getOptionsJson(preDataJsonList);
 		    	System.out.println(re);		
 		    	return re;
 	    	}
 	    	else {
 	        String re="[";
-	    	Connection conn = getConn();
-	    	PreparedStatement result;
 	    		for(int i=0;i<31;i++) {
 					try {
 						MapData mapdata=new MapData();
-			    		//sql = "select * from "+pos[0]+"  where date='"+date+"'";
 						sql = "select * from "+pos[i];
-			    		System.out.println("date="+date);
-						System.out.println("sql= "+sql);
 			    		ResultSet rs = ((PreparedStatement) conn.prepareStatement(sql)).executeQuery();
 			    		while(rs.next()) {
 			    			d=rs.getString("date");
 			    			if(d.equals(date)) {
 			    				re+="{";
 			    				r=rs.getString("value");
-			    				System.out.println("r= "+r);
-			    				System.out.println("temp="+r);
 					    		temp=r.split("#");
 					    		re+="\"pos\":";
 					    		re+="\""+pos[i]+"\",";
 					    		re+="\"min\":"+temp[2]+",";
 					    		re+="\"avg\":"+temp[0]+",";
 					    		re+="\"max\":"+temp[1]+"},";
-					    		mapdata.setPos(pos[i]);
-					    		mapdata.setAvg(Double.parseDouble(temp[0]));
-					    		mapdata.setMax(Double.parseDouble(temp[1]));
-					    		mapdata.setMin(Double.parseDouble(temp[2]));
-					    		list.add(mapdata);
 					    		break;
 			    			}
 			    		}
@@ -157,7 +176,6 @@ public class TransData {
 		    	}
 	    		re=re.substring(0,re.length() - 1);
 	    		re+="]";
-	    		//re=getMapOptionsJson(list);
 	    		System.out.println(re);
 	    		return re;
 	    	}
@@ -172,7 +190,6 @@ public class TransData {
 	    	String password=manage.getPassword();
 	    	String newName=manage.getUsernameafter();
 	    	String nameBefore=manage.getUsernamebefore(); 
-	    	System.out.println("str= "+order);
 	    	if(order.equals("all")) {
 	    		ArrayList<User> userlist=(ArrayList<User>) userMapper.getUserList();
 		    	String re=getEvaluatedOptionsJson(userlist);
@@ -184,8 +201,6 @@ public class TransData {
 	    		return "1";
 	    	}
 	    	if(order.equals("modify")) {
-	    		System.out.println("newName= "+newName);
-	    		System.out.println("nameBefore= "+nameBefore);
 	    		if(newName.equals(nameBefore)) {//只改密码
 	    			userMapper.updatePassword(nameBefore, password);
 	    			return "1";
@@ -193,8 +208,9 @@ public class TransData {
 	    		else {
 	    			String exist=userMapper.existName(newName);
 	    			if(exist==null) {
-	    				userMapper.deleteUser(nameBefore);
-	    				userMapper.insertUser(newName, password,"user");
+	    				String role=userMapper.getRole(nameBefore);
+	    				userMapper.deleteUser(nameBefore);    				
+	    				userMapper.insertUser(newName, password,role);
 	    				return "1";
 	    			}
 	    			else {
@@ -215,7 +231,17 @@ public class TransData {
 	    	return "3";
 	    }	
 	    
-	
+	    public static String getOptionsJson(ArrayList<PredictedData> checkItemIds) {
+	        if (checkItemIds.isEmpty()) {
+	            return null;
+	        }
+	        JSONArray jsonArray = new JSONArray();
+	        for (PredictedData item : checkItemIds) {
+	            jsonArray.put(item.getJSONObject());
+	        }
+
+	        return jsonArray.toString();
+	    }
 	    public static String getEvaluatedOptionsJson(ArrayList<User> checkItemIds) {
 	        if (checkItemIds.isEmpty()) {
 	            return null;
@@ -224,19 +250,9 @@ public class TransData {
 	        for (User item : checkItemIds) {
 	            jsonArray.put(item.getJSONObject());
 	        }
-	        //System.out.println(jasonArray);
 	        return jsonArray.toString();
 	    }
-	    public static String getMapOptionsJson(ArrayList<MapData> checkItemIds) {
-	        if (checkItemIds.isEmpty()) {
-	            return null;
-	        }
-	        JSONArray jsonArray = new JSONArray();
-	        for (MapData item : checkItemIds) {
-	            jsonArray.put(item.getJSONObject());
-	        }   
-	        return jsonArray.toString();
-	    }
+
 	    private static Connection getConn() {
 
 			String driver = "com.mysql.jdbc.Driver";

@@ -12,12 +12,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-//@Service(interfaceClass=IOtherCertificateService.class)
 @Service
 public class UserImpl implements UserService {
 
     @Autowired
-    //private UserMapper usm;
     private LoginMapper logMapper;
 
     @Override
@@ -30,24 +28,6 @@ public class UserImpl implements UserService {
 		return logMapper.getUserPasswordByName(name);
 	}
  
-    @Override
-    public JSONArray getList() {
-        JSONArray res = new JSONArray();
-        //List<User> userList = usm.getUserList();
-        //res.add(userList);
-        return res;
-    }
-
-    @Override
-    public void addUser(String user_name, String password) {
-        //usm.insertUser(user_name,password);
-    }
-
-    @Override
-    public void deleteUser(String user_name) {
-        //usm.deleteUser(user_name);
-    }
-
 	@Override
 	public User getUser(String username) {
 		return logMapper.getUser(username);

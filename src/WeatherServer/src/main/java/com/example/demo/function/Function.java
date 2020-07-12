@@ -1,5 +1,6 @@
 //java调用python里的预测函数获取预测后数据
 //作者：黎佩瑜，王迪
+//最终版没有用到，以备不时之需
 
 package com.example.demo.function;
 

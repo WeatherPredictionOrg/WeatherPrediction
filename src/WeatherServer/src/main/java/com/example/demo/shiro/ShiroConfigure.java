@@ -44,10 +44,7 @@ public class ShiroConfigure {
 	public ShiroFilterFactoryBean getShiroFilterFactoryBean(@Qualifier("getDefaultWebSecurityManager") DefaultWebSecurityManager defaultWebSecurityManager) {
 		ShiroFilterFactoryBean bean=new ShiroFilterFactoryBean();
 		//设置安全管理器
-		bean.setSecurityManager(defaultWebSecurityManager);
-		//bean.setSuccessUrl("/manage");
-		//bean.setLoginUrl("/admin");
-		//bean.setUnauthorizedUrl("/pickdate");
+		bean.setSecurityManager(defaultWebSecurityManager);		
 		//添加Shiro的内置过滤器
 		Map<String,String>filterMap=new LinkedHashMap<>();
 		System.out.println("拦截了吗？");
@@ -55,6 +52,7 @@ public class ShiroConfigure {
 		filterMap.put("/register", "anon");
 		filterMap.put("/pickdate", "roles[user]");
 		filterMap.put("/admin", "roles[admin]");
+		bean.setUnauthorizedUrl("/");
 		bean.setLoginUrl("/");
 		bean.setFilterChainDefinitionMap(filterMap);
 		return bean;

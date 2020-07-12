@@ -19,6 +19,9 @@ public interface UserMapper {
     @Select("Select * from member where username=#{username}")
     String existName(String username);
     
+    @Select("Select roles from member where username=#{username}")
+    String getRole(String username);
+    
     @Update("update member set password=#{password} where username=#{username}")
     void updatePassword(String username,String password);
 
