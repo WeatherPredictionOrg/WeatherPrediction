@@ -32,10 +32,8 @@ public class UserRealm extends AuthorizingRealm {
 		 System.out.println("————权限认证————");
 		    Subject subject=SecurityUtils.getSubject();
 		    User currentUser=(User)subject.getPrincipal();
-	        //String username = (String) SecurityUtils.getSubject().getPrincipal();
 	        SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
 	        //获得该用户角色
-	        //String role = userService.getUserRoleByName(username);
 	        String role=currentUser.getRole();
 	        System.out.println("username "+currentUser.getUsername());
 	        System.out.println("role "+role);
@@ -62,7 +60,6 @@ public class UserRealm extends AuthorizingRealm {
         }
         System.out.println("身份认证完毕");
         //密码认证交给shiro
-        //return new SimpleAuthenticationInfo("", password, "");
         return new SimpleAuthenticationInfo(user, password, getName());
 	}
 
