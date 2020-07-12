@@ -1,7 +1,6 @@
 package com.example.demo.impl;
 
 import com.alibaba.fastjson.JSONArray;
-import com.example.demo.config.CommonDao;
 import com.example.demo.enity.User;
 import com.example.demo.mapper.LoginMapper;
 import com.example.demo.mapper.UserMapper;

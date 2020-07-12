@@ -1,5 +1,9 @@
 package com.example.demo.controller;
 import java.util.concurrent.atomic.AtomicLong;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -32,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.enity.Data;
 import com.example.demo.enity.Manage;
+import com.example.demo.enity.MapData;
 import com.example.demo.enity.PredictedData;
 import com.example.demo.enity.User;
 import com.example.demo.function.Function;
@@ -95,13 +100,68 @@ public class TransData {
 	    @RequestMapping(value = "/pickdate", method = RequestMethod.POST)
 	    @ResponseBody
 	    public String getJson(@RequestBody Data data) {
+	    	String[] pos= {"安徽","北京","福建","甘肃","广东","广西","贵州","黑龙江","海南","河北","河南",
+	    			"河北","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西",
+	    			"陕西","上海","四川","天津","西藏","新疆","云南","浙江","重庆"};
+	    	String sql,r,d;
+	    	ArrayList<MapData> list =new ArrayList<MapData>();
+	    	String[] temp;
 	    	String s1=data.getDate1();
 	    	String s2=data.getDate2();
-	    	Function function=new Function();
-	    	System.out.println(s1);
-	    	String re=function.getJsonRun(s1, s2);
-	    	System.out.println(re);		
-	    	return re;
+	    	String date=data.getDate();
+	    	String order=data.getOrder();
+	    	if(order.equals("chart")) {
+	    		Function function=new Function();
+		    	System.out.println(s1);
+		    	String re=function.getJsonRun(s1, s2);
+		    	System.out.println(re);		
+		    	return re;
+	    	}
+	    	else {
+	        String re="[";
+	    	Connection conn = getConn();
+	    	PreparedStatement result;
+	    		for(int i=0;i<31;i++) {
+					try {
+						MapData mapdata=new MapData();
+			    		//sql = "select * from "+pos[0]+"  where date='"+date+"'";
+						sql = "select * from "+pos[i];
+			    		System.out.println("date="+date);
+						System.out.println("sql= "+sql);
+			    		ResultSet rs = ((PreparedStatement) conn.prepareStatement(sql)).executeQuery();
+			    		while(rs.next()) {
+			    			d=rs.getString("date");
+			    			if(d.equals(date)) {
+			    				re+="{";
+			    				r=rs.getString("value");
+			    				System.out.println("r= "+r);
+			    				System.out.println("temp="+r);
+					    		temp=r.split("#");
+					    		re+="\"pos\":";
+					    		re+="\""+pos[i]+"\",";
+					    		re+="\"min\":"+temp[2]+",";
+					    		re+="\"avg\":"+temp[0]+",";
+					    		re+="\"max\":"+temp[1]+"},";
+					    		mapdata.setPos(pos[i]);
+					    		mapdata.setAvg(Double.parseDouble(temp[0]));
+					    		mapdata.setMax(Double.parseDouble(temp[1]));
+					    		mapdata.setMin(Double.parseDouble(temp[2]));
+					    		list.add(mapdata);
+					    		break;
+			    			}
+			    		}
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
+		    		
+		    	}
+	    		re=re.substring(0,re.length() - 1);
+	    		re+="]";
+	    		//re=getMapOptionsJson(list);
+	    		System.out.println(re);
+	    		return re;
+	    	}
+	    	
 	    }
 	    
 	    @RequestMapping(value = "/admin", method = RequestMethod.POST)
@@ -167,4 +227,31 @@ public class TransData {
 	        //System.out.println(jasonArray);
 	        return jsonArray.toString();
 	    }
+	    public static String getMapOptionsJson(ArrayList<MapData> checkItemIds) {
+	        if (checkItemIds.isEmpty()) {
+	            return null;
+	        }
+	        JSONArray jsonArray = new JSONArray();
+	        for (MapData item : checkItemIds) {
+	            jsonArray.put(item.getJSONObject());
+	        }   
+	        return jsonArray.toString();
+	    }
+	    private static Connection getConn() {
+
+			String driver = "com.mysql.jdbc.Driver";
+			String url = "jdbc:mysql://localhost:3306/predict?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+			String username = "root";
+			String password = "Mysql78089091";
+			Connection conn = null;
+			try {
+				Class.forName(driver); // classLoader,加载对应驱动
+				conn = (Connection) DriverManager.getConnection(url, username, password);
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			return conn;
+		}
 }

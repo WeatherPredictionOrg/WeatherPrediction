@@ -20,13 +20,13 @@ import com.example.demo.enity.PredictedData;
 
 public class Function {
 	public static void main(String[] args) {
-		//System.out.println(getJsonRun("2009-01-01","2009-01-03"));
+		System.out.println(getJsonRun("2020-07-01","2009-01-03"));
 	}
     public static String getJsonRun(String date1,String date2) {
     	ArrayList<PredictedData> preDataJsonList =new ArrayList<PredictedData>();
     	JSONObject jsonObject=new JSONObject();
-    	
-    	String str="python E:\\\\Lib\\\\site-packages\\\\arima_multi_days.py -start "+date1;
+    	double avg,min,max;
+    	String str="python E:\\\\Lib\\\\site-packages\\\\lstm_predictor.py -start "+date1+" -city "+"beijing";
 		Process proc;
         try {
             proc = Runtime.getRuntime().exec(str);
@@ -38,9 +38,15 @@ public class Function {
             	//System.out.println(line);
             	temp=line.split(" ");
             	preData.setDate(temp[0]);
-            	preData.setAverage(Double.parseDouble(temp[1]));
-            	preData.setMax(Double.parseDouble(temp[2]));
-            	preData.setMin(Double.parseDouble(temp[3]));
+            	avg=Double.parseDouble(temp[1]);
+            	
+            	max=Double.parseDouble(temp[2]);
+            	
+            	preData.setAverage(avg);
+            	preData.setMax(max);
+            	min=Double.parseDouble(temp[3]);
+            	
+            	preData.setMin(min);
             	preDataJsonList.add(preData);
             }
             in.close();
